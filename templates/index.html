@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Image Gallery</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #4a90e2;
+            font-weight: 500;
+        }
+
+        .upload-form {
+            border: 2px dashed #ccc;
+            padding: 25px;
+            background-color: #fff;
+            margin-bottom: 30px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .upload-form input[type="file"] {
+            font-size: 1rem;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .upload-form button {
+            font-size: 1.2rem;
+            padding: 12px 20px;
+            background-color: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .upload-form button:hover {
+            background-color: #357ABD;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 600px;
+            width: 80%;
+        }
+
+        .modal img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .modal h3 {
+            color: #4a90e2;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .modal p {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .close-btn {
+            padding: 10px 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s;
+        }
+
+        .close-btn:hover {
+            background-color: #c0392b;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>Cloud Image Gallery</h1>
+
+    <div class="upload-form">
+        <form method="post" enctype="multipart/form-data" action="/upload">
+            <input type="file" name="formFile" accept="image/*" required>
+            <button type="submit" style="margin-top: 10px;">Upload Image</button>
+        </form>
+    </div>
+
+    <div class="gallery">
+        {% for image in images %}
+        <div class="card">
+            <img 
+                src="{{ url_for('get_file', filename=image.name) }}" 
+                class="image"
+                onclick="openModal('{{ image.name }}', '{{ image.title }}', '{{ image.description }}')"
+            >
+        </div>
+        {% endfor %}
+    </div>
+    
+
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle"></h3>
+            <img id="modalImage" src="" alt="">
+            <p id="modalDescription"></p>
+            <button class="close-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function openModal(imageSrc, title, description) {
+            const [userId, filename] = imageSrc.split('/');
+            const imageUrl = `/files/${userId}/${filename}`;
+
+            document.getElementById("modalTitle").textContent = title;
+            document.getElementById("modalImage").src = imageUrl;
+            document.getElementById("modalDescription").textContent = description;
+            document.getElementById("imageModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("imageModal").style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target === document.getElementById("imageModal")) {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+
+</html>
